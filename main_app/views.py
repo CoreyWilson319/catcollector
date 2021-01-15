@@ -38,6 +38,9 @@ def login_view(request):
           print(f"The account for {u} has been disabled.")
       else:
         print('The username and/or password is incorrect.')
+    else:
+      form = AuthenticationForm()
+      return render(request, 'login.html', {'form': form})
   else: # get request that sent up empty form
     form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
