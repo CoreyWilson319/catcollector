@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+<!-- {% load static %} Not needed because we load static in base -->
+{% block content %}
+<h2>Sign Up</h2>
+<form action="." method ="POST">
+{% csrf_token %}
+{{ form.as_p }}
+<input class="btn btn-success" type="submit" value="Sign Up">
+</form>
+{% endblock %}

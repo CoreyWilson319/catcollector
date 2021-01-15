@@ -11,6 +11,10 @@
         <p>Age: Kitten </p>
     {% endif %}
 
+    {% for cattoy in cat.cattoys.all %}
+        <p>{{cattoy.name}}</p>
+        <p>{{cattoy.color}}</p>
+    {% endfor %}
 
     <a class= 'btn btn-primary' href="{% url 'cats_update' cat.id %}">Update Details</a> |
     <a class= 'btn btn-danger' href="{% url 'cats_delete' cat.id %}">Delete Details</a> 

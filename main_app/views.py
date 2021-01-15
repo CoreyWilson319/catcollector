@@ -3,24 +3,8 @@ from .models import Cat, CatToy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
-
-# create a url
-# create an action (in views)
-
-# main_app/views.py
-
-# class Cat:
-#     def __init__(self, name, breed, description, age):
-#         self.name = name
-#         self.breed = breed
-#         self.description = description
-#         self.age = age
-# cats = [
-#     Cat('Lolo', 'tabby', 'foul little demon', 3),
-#     Cat('Sachi', 'tortoise shell', 'diluted tortoise shell', 0),
-#     Cat('Raven', 'black tripod', '3 legged cat', 4)
-# ]
-
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth import authenticate, login, logout
 
 # Create your views here.
 def index(request):
@@ -28,6 +12,47 @@ def index(request):
 
 def about(request):
     return render(request, 'about.html')
+
+######### USER #########
+def profile(request, username):
+    user = User.objects.get(username=username)
+    cats = Cat.objects.filter(user=user)
+    return render(request, 'profile.html', {'username': username, 'cats': cats})
+
+def login_view(request):
+  # if post, then authenticate (the user will be submitting a username and password)
+  if request.method == 'POST':
+    form = AuthenticationForm(request, request.POST)
+    if form.is_valid():
+      u = form.cleaned_data['username']
+      p = form.cleaned_data.get('password')
+      user = authenticate(username=u, password=p)
+      if user is not None:
+        if user.is_active:
+          login(request, user)
+          return HttpResponseRedirect('/user/' + u)
+        else:
+          print(f"The account for {u} has been disabled.")
+      else:
+        print('The username and/or password is incorrect.')
+  else: # get request that sent up empty form
+    form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect('/cats')
+
+def signup_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return HttpResponseRedirect('/cats')
+    else: 
+        form = UserCreationForm()
+        return render(request, 'signup.html', {"form": form})
 
 ###### CATS #######
 def cats_index(request):
@@ -51,12 +76,12 @@ class CatCreate(CreateView):
 
 class CatUpdate(UpdateView):
     model = Cat
-    fields = ['name', 'breed', 'description', 'age']
+    fields = ['name', 'breed', 'description', 'age', 'cattoys']
     
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.save()
-        return HttpResponseRedirect('/cats')
+        return HttpResponseRedirect('/cats/' + str(self.object.pk))
     
 
 
@@ -64,12 +89,6 @@ class CatDelete(DeleteView):
     model = Cat
     success_url = '/cats'
 
-    
-######### USER #########
-def profile(request, username):
-    user = User.objects.get(username=username)
-    cats = Cat.objects.filter(user=user)
-    return render(request, 'profile.html', {'username': username, 'cats': cats})
     
 ######### CatToy #########
 def cattoys_index(request):
