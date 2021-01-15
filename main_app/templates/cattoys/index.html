@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<a href="/cattoys/create">Add a New Cat Toy</a>
+</a>
+    <hr />
+    {% for cattoy in cattoys %}
+    <div>
+        <a href="{% url 'cat_toys_show' cattoy.id %}">
+            <div class="card-body">
+                <span>{{ cattoy.name }}</span>
+                <span>{{ cattoy.color }}</span>
+            </div>
+        </a>
+    </div>
+{% endfor %}
+
+{% endblock %}
